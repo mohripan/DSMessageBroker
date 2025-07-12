@@ -17,6 +17,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DSMessageBroker.App\DSMessageBroker.App.csproj" />
+    <ProjectReference Include="..\DSMessageBroker.Broker\DSMessageBroker.Broker.csproj" />
+    <ProjectReference Include="..\DSMessageBroker.Networking\DSMessageBroker.Networking.csproj" />
+    <ProjectReference Include="..\DSMessageBroker.Services\DSMessageBroker.Services.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 
