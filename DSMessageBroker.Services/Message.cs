@@ -8,8 +8,17 @@ namespace DSMessageBroker.Services
 {
     public class Message
     {
-        public Guid Id { get; set; }
-        public string Body { get; set; }
-        public DateTime TimeStamp { get; set; }
+        public Guid Id { get; }
+        public string Payload { get; }
+        public DateTime Timestamp { get; }
+
+        public Message(string payload)
+        {
+            Id = Guid.NewGuid();
+            Payload = payload;
+            Timestamp = DateTime.UtcNow;
+        }
+
+        public override string ToString() => $"[{Timestamp:HH:mm:ss}] {Id} - {Payload}";
     }
 }

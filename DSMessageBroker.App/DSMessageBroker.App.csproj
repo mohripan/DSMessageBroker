@@ -11,4 +11,9 @@
     <Folder Include="App_Data\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DSMessageBroker.Broker\DSMessageBroker.Broker.csproj" />
+    <ProjectReference Include="..\DSMessageBroker.Networking\DSMessageBroker.Networking.csproj" />
+  </ItemGroup>
+
 </Project>

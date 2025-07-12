@@ -1,12 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DSMessageBroker.Services;
 
 namespace DSMessageBroker.Broker
 {
-    internal class BrokerServer
+    public class BrokerServer
     {
+        private readonly InMemoryQueue _queue = new();
+
+        public void ReceiveMessage(string payload)
+        {
+            var msg = new Message(payload);
+            _queue.Enqueue(msg);
+            Console.WriteLine($"[Broker] Received: {msg}");
+        }
+
+        public Message? DeliverMessage()
+        {
+            if (_queue.TryDequeue(out var message))
+            {
+                Console.WriteLine($"[Broker] Delivered: {message}");
+                return message;
+            }
+            return null;
+        }
+
+        public int GetQueueLength() => _queue.Count;
     }
 }
