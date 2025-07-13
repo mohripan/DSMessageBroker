@@ -7,11 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSMessageBroker.Services", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSMessageBroker.Broker", "DSMessageBroker.Broker\DSMessageBroker.Broker.csproj", "{F811E8A3-DEB0-432A-95DE-3E907ACD2CAF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSMessageBroker.Networking", "DSMessageBroker.Networking\DSMessageBroker.Networking.csproj", "{A54D823E-AB86-4CD4-8E52-26D27FA312C3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSMessageBroker.Networking", "DSMessageBroker.Networking\DSMessageBroker.Networking.csproj", "{A54D823E-AB86-4CD4-8E52-26D27FA312C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSMessageBroker.App", "DSMessageBroker.App\DSMessageBroker.App.csproj", "{6AEB4DE4-9451-43E7-BF77-23FA284A5621}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSMessageBroker.App", "DSMessageBroker.App\DSMessageBroker.App.csproj", "{6AEB4DE4-9451-43E7-BF77-23FA284A5621}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSMessageBroker.Tests", "DSMessageBroker.Tests\DSMessageBroker.Tests.csproj", "{39F1C5D7-0C22-4EAF-A8B8-C37847EBC6C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSMessageBroker.Tests", "DSMessageBroker.Tests\DSMessageBroker.Tests.csproj", "{39F1C5D7-0C22-4EAF-A8B8-C37847EBC6C2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageBroker.Storage", "MessageBroker.Storage\MessageBroker.Storage.csproj", "{F412F841-2266-4FD9-A714-15F0A10B2B3C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{39F1C5D7-0C22-4EAF-A8B8-C37847EBC6C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{39F1C5D7-0C22-4EAF-A8B8-C37847EBC6C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{39F1C5D7-0C22-4EAF-A8B8-C37847EBC6C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F412F841-2266-4FD9-A714-15F0A10B2B3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F412F841-2266-4FD9-A714-15F0A10B2B3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F412F841-2266-4FD9-A714-15F0A10B2B3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F412F841-2266-4FD9-A714-15F0A10B2B3C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

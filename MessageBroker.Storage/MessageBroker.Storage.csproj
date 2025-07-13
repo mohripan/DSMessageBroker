@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DSMessageBroker.Services\DSMessageBroker.Services.csproj" />
-    <ProjectReference Include="..\MessageBroker.Storage\MessageBroker.Storage.csproj" />
   </ItemGroup>
 
 </Project>

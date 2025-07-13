@@ -19,6 +19,13 @@ namespace DSMessageBroker.Services
             Timestamp = DateTime.UtcNow;
         }
 
+        public Message(string payload, Guid id, DateTime timestamp)
+        {
+            Id = id;
+            Payload = payload;
+            Timestamp = timestamp;
+        }
+
         public override string ToString() => $"[{Timestamp:HH:mm:ss}] {Id} - {Payload}";
     }
 }

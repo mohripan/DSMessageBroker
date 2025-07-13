@@ -44,7 +44,7 @@ namespace DSMessageBroker.Networking
                 if (line.StartsWith("PRODUCE|"))
                 {
                     var payload = line.Substring(8);
-                    _broker.ReceiveMessage(payload);
+                    await _broker.ReceiveMessage(payload);
                     await writer.WriteLineAsync("ACK");
                 }
                 else if (line == "CONSUME")

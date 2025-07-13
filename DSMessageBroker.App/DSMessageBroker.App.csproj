@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DSMessageBroker.Broker\DSMessageBroker.Broker.csproj" />
     <ProjectReference Include="..\DSMessageBroker.Networking\DSMessageBroker.Networking.csproj" />
+    <ProjectReference Include="..\MessageBroker.Storage\MessageBroker.Storage.csproj" />
   </ItemGroup>
 
 </Project>
