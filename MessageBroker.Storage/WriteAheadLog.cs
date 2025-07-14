@@ -1,4 +1,5 @@
 ﻿using DSMessageBroker.Services;
+using System.Globalization;
 
 namespace MessageBroker.Storage
 {
@@ -42,15 +43,22 @@ namespace MessageBroker.Storage
 
             foreach (var line in lines)
             {
-                var parts = line.Split('|', 3);
-                if (parts.Length != 3) continue;
+                try
+                {
+                    var parts = line.Split('|', 3);
+                    if (parts.Length != 3) continue;
 
-                var id = Guid.Parse(parts[0]);
-                var timestamp = DateTime.Parse(parts[1]);
-                var payload = parts[2];
+                    var id = Guid.Parse(parts[0]);
+                    var timestamp = DateTime.Parse(parts[1], null, DateTimeStyles.AdjustToUniversal);
+                    var payload = parts[2];
 
-                var message = new Message(payload, id, timestamp);
-                messages.Add(message);
+                    var message = new Message(payload, id, timestamp);
+                    messages.Add(message);
+                }
+                catch
+                {
+                    // Skip malformed line
+                }
             }
 
             return messages;
