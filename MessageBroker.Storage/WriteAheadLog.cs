@@ -5,16 +5,13 @@ namespace MessageBroker.Storage
 {
     public class WriteAheadLog : IStorageEngine
     {
-        private readonly string _logDirectory;
         private readonly string _logFilePath;
         private readonly SemaphoreSlim _lock = new(1, 1);
 
-        public WriteAheadLog(string logDirectory)
+        public WriteAheadLog(string logDirectory, string topic)
         {
-            _logDirectory = logDirectory;
-            _logFilePath = Path.Combine(logDirectory, "wal.log");
-
-            Directory.CreateDirectory(_logDirectory);
+            Directory.CreateDirectory(logDirectory);
+            _logFilePath = Path.Combine(logDirectory, $"{topic}.log");
         }
 
         public async Task AppendAsync(Message message)
@@ -52,12 +49,14 @@ namespace MessageBroker.Storage
                     var timestamp = DateTime.Parse(parts[1], null, DateTimeStyles.AdjustToUniversal);
                     var payload = parts[2];
 
-                    var message = new Message(payload, id, timestamp);
+                    var topic = Path.GetFileNameWithoutExtension(_logFilePath);
+
+                    var message = new Message(topic, payload, id, timestamp);
                     messages.Add(message);
                 }
                 catch
                 {
-                    // Skip malformed line
+                    // Skip malformed lines
                 }
             }
 

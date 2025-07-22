@@ -4,7 +4,7 @@ using MessageBroker.Storage;
 using System.Net.Sockets;
 using System.Text;
 
-Console.WriteLine("Select rule: [broker | producer | consumer]");
+Console.WriteLine("Select role: [broker | producer | consumer]");
 var role = Console.ReadLine()?.Trim().ToLowerInvariant();
 
 switch (role)
@@ -29,8 +29,7 @@ switch (role)
 async Task RunBrokerAsync()
 {
     var logDir = Path.Combine(AppContext.BaseDirectory, "wal");
-    var wal = new WriteAheadLog(logDir);
-    var broker = new BrokerServer(wal);
+    var broker = new BrokerServer(logDir);
     var server = new TcpServer(5000, broker);
 
     var cts = new CancellationTokenSource();
@@ -46,12 +45,15 @@ async Task RunBrokerAsync()
 
 async Task RunProducerAsync()
 {
+    Console.Write("Enter topic name to produce to: ");
+    var topic = Console.ReadLine() ?? "default";
+
     using var client = new TcpClient();
     await client.ConnectAsync("localhost", 5000);
-    Console.WriteLine("[Producer] Connected to broker");
+    Console.WriteLine($"[Producer] Connected to broker on topic '{topic}'");
 
     using var stream = client.GetStream();
-    using var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true};
+    using var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
     using var reader = new StreamReader(stream, Encoding.UTF8);
 
     var random = new Random();
@@ -59,11 +61,11 @@ async Task RunProducerAsync()
     while (true)
     {
         var payload = $"Message-{random.Next(1000, 9999)}";
-        var command = $"PRODUCE|{payload}";
+        var command = $"PRODUCE|{topic}|{payload}";
 
         await writer.WriteLineAsync(command);
         var response = await reader.ReadLineAsync();
-        Console.WriteLine($"[Producer] Sent: {payload}, Broker Response: {response}");
+        Console.WriteLine($"[Producer] Sent to '{topic}': {payload} → {response}");
 
         await Task.Delay(1000);
     }
@@ -71,13 +73,20 @@ async Task RunProducerAsync()
 
 async Task RunConsumerAsync()
 {
+    Console.Write("Enter topic name to subscribe: ");
+    var topic = Console.ReadLine() ?? "default";
+
     using var client = new TcpClient();
     await client.ConnectAsync("localhost", 5000);
-    Console.WriteLine("[Consumer] Connected to broker");
+    Console.WriteLine($"[Consumer] Connected to broker, subscribing to '{topic}'...");
 
     using var stream = client.GetStream();
     using var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
     using var reader = new StreamReader(stream, Encoding.UTF8);
+
+    await writer.WriteLineAsync($"SUBSCRIBE|{topic}");
+    var subAck = await reader.ReadLineAsync();
+    Console.WriteLine($"[Consumer] {subAck}");
 
     while (true)
     {

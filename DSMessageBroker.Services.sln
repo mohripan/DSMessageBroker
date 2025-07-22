@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSMessageBroker.App", "DSMe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSMessageBroker.Tests", "DSMessageBroker.Tests\DSMessageBroker.Tests.csproj", "{39F1C5D7-0C22-4EAF-A8B8-C37847EBC6C2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageBroker.Storage", "MessageBroker.Storage\MessageBroker.Storage.csproj", "{F412F841-2266-4FD9-A714-15F0A10B2B3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageBroker.Storage", "MessageBroker.Storage\MessageBroker.Storage.csproj", "{F412F841-2266-4FD9-A714-15F0A10B2B3C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

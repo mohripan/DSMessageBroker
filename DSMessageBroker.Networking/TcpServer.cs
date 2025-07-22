@@ -32,9 +32,11 @@ namespace DSMessageBroker.Networking
         {
             using var stream = client.GetStream();
             using var reader = new StreamReader(stream, Encoding.UTF8);
-            using var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true};
+            using var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
 
             Console.WriteLine($"[Server] Client connected.");
+
+            string? subscribedTopic = null;
 
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -43,13 +45,40 @@ namespace DSMessageBroker.Networking
 
                 if (line.StartsWith("PRODUCE|"))
                 {
-                    var payload = line.Substring(8);
-                    await _broker.ReceiveMessage(payload);
+                    var parts = line.Split('|', 3);
+                    if (parts.Length != 3)
+                    {
+                        await writer.WriteLineAsync("ERR|Invalid PRODUCE format");
+                        continue;
+                    }
+
+                    var topic = parts[1];
+                    var payload = parts[2];
+
+                    await _broker.ReceiveMessageAsync(topic, payload);
                     await writer.WriteLineAsync("ACK");
+                }
+                else if (line.StartsWith("SUBSCRIBE|"))
+                {
+                    var parts = line.Split('|', 2);
+                    if (parts.Length != 2)
+                    {
+                        await writer.WriteLineAsync("ERR|Invalid SUBCRIBE format");
+                        continue;
+                    }
+
+                    subscribedTopic = parts[1];
+                    await writer.WriteLineAsync($"SUBSCRIBED|{subscribedTopic}");
                 }
                 else if (line == "CONSUME")
                 {
-                    var msg = _broker.DeliverMessage();
+                    if (subscribedTopic == null)
+                    {
+                        await writer.WriteLineAsync("ERR|Not subscribed to any topic");
+                        continue;
+                    }
+
+                    var msg = _broker.DeliverMessage(subscribedTopic);
                     await writer.WriteLineAsync(msg?.ToString() ?? "NO_MESSAGE");
                 }
                 else

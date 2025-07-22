@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,12 +14,13 @@ namespace DSMessageBroker.Tests
         public void Enqueue_And_Dequeue_Works()
         {
             var queue = new InMemoryQueue();
-            var message = new Message("test");
+            var message = new Message("test-topic", "test");
 
             queue.Enqueue(message);
 
             Assert.True(queue.TryDequeue(out var result));
             Assert.Equal(message.Id, result?.Id);
+            Assert.Equal("test-topic", result?.Topic);
         }
 
         [Fact]
@@ -38,8 +40,8 @@ namespace DSMessageBroker.Tests
             var queue = new InMemoryQueue();
             Assert.Equal(0, queue.Count);
 
-            queue.Enqueue(new Message("msg1"));
-            queue.Enqueue(new Message("msg2"));
+            queue.Enqueue(new Message("topic", "msg1"));
+            queue.Enqueue(new Message("topic", "msg2"));
 
             Assert.Equal(2, queue.Count);
 
@@ -58,7 +60,7 @@ namespace DSMessageBroker.Tests
 
             Parallel.For(0, total, i =>
             {
-                queue.Enqueue(new Message($"msg-{i}"));
+                queue.Enqueue(new Message("topic", $"msg-{i}"));
             });
 
             var dequeued = new List<Message>();
@@ -80,9 +82,10 @@ namespace DSMessageBroker.Tests
         [Fact]
         public void Message_ToString_FormatsCorrectly()
         {
-            var message = new Message("test-payload");
+            var message = new Message("finance", "test-payload");
             var str = message.ToString();
 
+            Assert.Contains("finance", str);
             Assert.Contains("test-payload", str);
             Assert.Contains(message.Id.ToString(), str);
         }
