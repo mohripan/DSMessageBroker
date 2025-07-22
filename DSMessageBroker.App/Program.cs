@@ -84,9 +84,13 @@ async Task RunConsumerAsync()
     Console.Write("Enter topic to subscribe to: ");
     var topic = Console.ReadLine();
 
+    await writer.WriteLineAsync($"SUBSCRIBE|{topic}");
+    var subResp = await reader.ReadLineAsync();
+    Console.WriteLine($"[Consumer] {subResp}");
+
     while (true)
     {
-        await writer.WriteLineAsync($"CONSUME|{topic}");
+        await writer.WriteLineAsync("CONSUME");
         var response = await reader.ReadLineAsync();
 
         if (string.IsNullOrWhiteSpace(response) || response == "NO_MESSAGE")
@@ -98,19 +102,16 @@ async Task RunConsumerAsync()
 
         Console.WriteLine($"[Consumer] Received: {response}");
 
-        // Try to parse message ID from the response (format: [timestamp] (topic) GUID - payload)
         var parts = response.Split(' ');
-        if (!Guid.TryParse(parts[2], out var messageId))
+        if (parts.Length < 3 || !Guid.TryParse(parts[2], out var messageId))
         {
             Console.WriteLine("[Consumer] Invalid message format");
             continue;
         }
 
-        // Simulate processing
         var random = new Random();
         await Task.Delay(random.Next(500, 1500));
 
-        // Randomly decide to ACK or NACK
         if (random.NextDouble() < 0.85)
         {
             await writer.WriteLineAsync($"ACK|{messageId}");
