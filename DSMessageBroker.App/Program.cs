@@ -1,6 +1,6 @@
 ﻿using DSMessageBroker.Broker;
 using DSMessageBroker.Networking;
-using MessageBroker.Storage;
+using DSMessageBroker.Services;
 using System.Net.Sockets;
 using System.Text;
 
@@ -88,6 +88,8 @@ async Task RunConsumerAsync()
     var subResp = await reader.ReadLineAsync();
     Console.WriteLine($"[Consumer] {subResp}");
 
+    var deduplicator = new ConsumerDeduplicator();
+
     while (true)
     {
         await writer.WriteLineAsync("CONSUME");
@@ -108,6 +110,16 @@ async Task RunConsumerAsync()
             Console.WriteLine("[Consumer] Invalid message format");
             continue;
         }
+
+        if (deduplicator.IsDuplicate(messageId))
+        {
+            Console.WriteLine($"[Consumer] Duplicate message detected, skipping: {messageId}");
+            await writer.WriteLineAsync($"ACK|{messageId}");
+            await reader.ReadLineAsync();
+            continue;
+        }
+
+        deduplicator.MarkProcessed(messageId);
 
         var random = new Random();
         await Task.Delay(random.Next(500, 1500));
