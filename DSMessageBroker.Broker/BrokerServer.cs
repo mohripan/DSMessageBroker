@@ -8,6 +8,7 @@ namespace DSMessageBroker.Broker
     {
         private readonly string _logDirectory;
         private readonly ConcurrentDictionary<string, TopicQueue> _topics = new();
+        private readonly ConcurrentDictionary<string, DeliveryTracker> _trackers = new();
 
         public BrokerServer(string logDirectory)
         {
@@ -49,10 +50,36 @@ namespace DSMessageBroker.Broker
                 if (queue.Queue.TryDequeue(out var message))
                 {
                     Console.WriteLine($"[Broker] [{topic}] Delivered: {message}");
+
+                    var tracker = _trackers.GetOrAdd(topic, _ =>
+                        new DeliveryTracker(
+                            TimeSpan.FromSeconds(10),
+                            msg => queue.Queue.Enqueue(msg)
+                        ));
+
+                    tracker.MarkDelivered(message);
                     return message;
                 }
             }
             return null;
+        }
+
+        public void Acknowledge(string topic, Guid messageId)
+        {
+            if (_trackers.TryGetValue(topic, out var tracker))
+            {
+                tracker.Acknowledge(messageId);
+                Console.WriteLine($"[Broker] [{topic}] ACK: {messageId}");
+            }
+        }
+
+        public void Nacknowledge(string topic, Guid messageId)
+        {
+            if (_trackers.TryGetValue(topic, out var tracker))
+            {
+                tracker.Nacknowledge(messageId);
+                Console.WriteLine($"[Broker] [{topic}] NACK: {messageId}");
+            }
         }
 
         private TopicQueue GetOrCreateTopicQueue(string topic)

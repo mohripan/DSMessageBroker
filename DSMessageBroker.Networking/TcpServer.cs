@@ -81,6 +81,42 @@ namespace DSMessageBroker.Networking
                     var msg = _broker.DeliverMessage(subscribedTopic);
                     await writer.WriteLineAsync(msg?.ToString() ?? "NO_MESSAGE");
                 }
+                else if (line.StartsWith("ACK|"))
+                {
+                    if (subscribedTopic == null)
+                    {
+                        await writer.WriteLineAsync("ERR|Not subscribed");
+                        continue;
+                    }
+
+                    var parts = line.Split('|');
+                    if (parts.Length != 2 || !Guid.TryParse(parts[1], out var messageId))
+                    {
+                        await writer.WriteLineAsync("ERR|Invalid ACK");
+                        continue;
+                    } 
+
+                    _broker.Acknowledge(subscribedTopic, messageId);
+                    await writer.WriteLineAsync($"ACKED|{messageId}");
+                }
+                else if (line.StartsWith("NACK|"))
+                {
+                    if (subscribedTopic == null)
+                    {
+                        await writer.WriteLineAsync("ERR|Not subscribed");
+                        continue;
+                    }
+
+                    var parts = line.Split('|');
+                    if (parts.Length != 2 || !Guid.TryParse(parts[1], out var messageId))
+                    {
+                        await writer.WriteLineAsync("ERR|Invalid NACK");
+                        continue;
+                    }
+
+                    _broker.Nacknowledge(subscribedTopic, messageId);
+                    await writer.WriteLineAsync($"NACKED|{messageId}");
+                }
                 else
                 {
                     await writer.WriteLineAsync("ERR|Invalid Command");

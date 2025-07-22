@@ -73,27 +73,55 @@ async Task RunProducerAsync()
 
 async Task RunConsumerAsync()
 {
-    Console.Write("Enter topic name to subscribe: ");
-    var topic = Console.ReadLine() ?? "default";
-
     using var client = new TcpClient();
     await client.ConnectAsync("localhost", 5000);
-    Console.WriteLine($"[Consumer] Connected to broker, subscribing to '{topic}'...");
+    Console.WriteLine("[Consumer] Connected to broker");
 
     using var stream = client.GetStream();
     using var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
     using var reader = new StreamReader(stream, Encoding.UTF8);
 
-    await writer.WriteLineAsync($"SUBSCRIBE|{topic}");
-    var subAck = await reader.ReadLineAsync();
-    Console.WriteLine($"[Consumer] {subAck}");
+    Console.Write("Enter topic to subscribe to: ");
+    var topic = Console.ReadLine();
 
     while (true)
     {
-        await writer.WriteLineAsync("CONSUME");
+        await writer.WriteLineAsync($"CONSUME|{topic}");
         var response = await reader.ReadLineAsync();
+
+        if (string.IsNullOrWhiteSpace(response) || response == "NO_MESSAGE")
+        {
+            Console.WriteLine("[Consumer] No message available.");
+            await Task.Delay(1000);
+            continue;
+        }
+
         Console.WriteLine($"[Consumer] Received: {response}");
 
-        await Task.Delay(1500);
+        // Try to parse message ID from the response (format: [timestamp] (topic) GUID - payload)
+        var parts = response.Split(' ');
+        if (!Guid.TryParse(parts[2], out var messageId))
+        {
+            Console.WriteLine("[Consumer] Invalid message format");
+            continue;
+        }
+
+        // Simulate processing
+        var random = new Random();
+        await Task.Delay(random.Next(500, 1500));
+
+        // Randomly decide to ACK or NACK
+        if (random.NextDouble() < 0.85)
+        {
+            await writer.WriteLineAsync($"ACK|{messageId}");
+            var ackResp = await reader.ReadLineAsync();
+            Console.WriteLine($"[Consumer] Sent ACK: {ackResp}");
+        }
+        else
+        {
+            await writer.WriteLineAsync($"NACK|{messageId}");
+            var nackResp = await reader.ReadLineAsync();
+            Console.WriteLine($"[Consumer] Sent NACK: {nackResp}");
+        }
     }
 }
