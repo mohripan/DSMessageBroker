@@ -20,7 +20,8 @@ namespace DSMessageBroker.Broker
             {
                 var topic = Path.GetFileNameWithoutExtension(file);
                 var wal = new WriteAheadLog(_logDirectory, topic);
-                var queue = new TopicQueue(topic, wal);
+                var ackStore = new AcknowledgedStore(_logDirectory, topic);
+                var queue = new TopicQueue(topic, wal, ackStore);
 
                 var messages = wal.RecoverAsync().Result;
                 foreach (var message in messages)
@@ -66,10 +67,12 @@ namespace DSMessageBroker.Broker
 
         public void Acknowledge(string topic, Guid messageId)
         {
-            if (_trackers.TryGetValue(topic, out var tracker))
+            if (_trackers.TryGetValue(topic, out var tracker) &&
+                _topics.TryGetValue(topic, out var queue))
             {
                 tracker.Acknowledge(messageId);
-                Console.WriteLine($"[Broker] [{topic}] ACK: {messageId}");
+                queue.AckStore.MarkAckedAsync(messageId).Wait();
+                Console.WriteLine($"[Broker] [{topic}] ACK: {messageId} (persisted)");
             }
         }
 
@@ -87,7 +90,8 @@ namespace DSMessageBroker.Broker
             return _topics.GetOrAdd(topic, t =>
             {
                 var wal = new WriteAheadLog(_logDirectory, topic);
-                return new TopicQueue(t, wal);
+                var ackStore = new AcknowledgedStore(_logDirectory, topic);
+                return new TopicQueue(t, wal, ackStore);
             });
         }
     }
