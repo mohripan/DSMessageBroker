@@ -26,11 +26,12 @@ namespace DSMessageBroker.Broker
                 var messages = wal.RecoverAsync().Result;
                 foreach (var message in messages)
                 {
-                    queue.Queue.Enqueue(message);
+                    if (!ackStore.IsAcked(message.Id))
+                        queue.Channel.Writer.TryWrite(message);
                 }
 
                 _topics[topic] = queue;
-                Console.WriteLine($"[Broker] Loaded topic '{topic}' with {queue.Queue.Count} messages.");
+                Console.WriteLine($"[Broker] Loaded topic '{topic}' with recovered messages.");
             }
         }
 
@@ -39,7 +40,7 @@ namespace DSMessageBroker.Broker
             var queue = GetOrCreateTopicQueue(topic);
             var message = new Message(topic, payload);
             await queue.Storage.AppendAsync(message);
-            queue.Queue.Enqueue(message);
+            await queue.Channel.Writer.WriteAsync(message);
 
             Console.WriteLine($"[Broker] [{topic}] Received: {message}");
         }
@@ -48,14 +49,14 @@ namespace DSMessageBroker.Broker
         {
             if (_topics.TryGetValue(topic, out var queue))
             {
-                if (queue.Queue.TryDequeue(out var message))
+                if (queue.Channel.Reader.TryRead(out var message))
                 {
                     Console.WriteLine($"[Broker] [{topic}] Delivered: {message}");
 
                     var tracker = _trackers.GetOrAdd(topic, _ =>
                         new DeliveryTracker(
                             TimeSpan.FromSeconds(10),
-                            msg => queue.Queue.Enqueue(msg)
+                            async msg => await queue.Channel.Writer.WriteAsync(msg)
                         ));
 
                     tracker.MarkDelivered(message);

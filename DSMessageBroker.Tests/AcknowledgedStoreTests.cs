@@ -85,11 +85,11 @@ namespace DSMessageBroker.Tests
             foreach (var msg in recovered)
             {
                 if (!ackStore.IsAcked(msg.Id))
-                    queue.Queue.Enqueue(msg);
+                    await queue.Channel.Writer.WriteAsync(msg);
             }
 
-            Assert.Equal(1, queue.Queue.Count);
-            queue.Queue.TryDequeue(out var remaining);
+            Assert.Equal(1, queue.Channel.Reader.Count);
+            queue.Channel.Reader.TryRead(out var remaining);
             Assert.Equal(msg2.Id, remaining?.Id);
         }
 
